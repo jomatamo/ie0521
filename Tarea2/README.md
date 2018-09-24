@@ -13,10 +13,11 @@ para un index predertinado. El programa al final imprime la estasdiscticas de si
 Para compilar el codigo se debe un utilizar en la consola:
 
   make
+  PATH=$PATH:.
 
-El makefile agrega el repositorio al path temporalemente, por lo que el nombre del ejecutable se cambio a cacheB34093
+El segundo comando agrega el repositorio al path temporalemente, por lo que el nombre del ejecutable se cambio a cacheB34093
 
 **Simulacion**
 despues de ejecuado, se debe ejecutar el siguiente comando para realizar la simulacion:
 
-  gunzip mcf.trace.gz | cache34093 -t <tamano cache> -l <tamano del bloque> -a <numero de vias>
+  gunzip *trace comprimido* | ./cache -t *tamano cache el bytes* -l *tamano del bloque* -a *numero de vias*
