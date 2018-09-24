@@ -9,11 +9,14 @@ memoria que se quieren accesar y el simulador se encarga de leerlas y empezar a
 agregar los bloques respectivos de estas o a victimizalos si estan llenas la vias
 para un index predertinado. El programa al final imprime la estasdiscticas de simulacion con el trace dado.
 
+**Compilacion de codigo**
 Para compilar el codigo se debe un utilizar en la consola:
-make
+
+  make
 
 El makefile agrega el repositorio al path temporalemente, por lo que el nombre del ejecutable se cambio a cacheB34093
 
+**Simulacion**
 despues de ejecuado, se debe ejecutar el siguiente comando para realizar la simulacion:
 
-gunzip mcf.trace.gz | cache34093 -t <tamano cache> -l <tamano del bloque> -a <numero de vias>
+  gunzip mcf.trace.gz | cache34093 -t <tamano cache> -l <tamano del bloque> -a <numero de vias>
