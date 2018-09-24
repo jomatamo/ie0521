@@ -8,32 +8,33 @@
 #include <bitset>
 using namespace std;
 
-Cache *cache1;
+Cache *cache1; // se crea un puntero a la base cache al cual se le asignara una nueva instancia en el main
 int Load_Store;
 int AddressH;
-string line;
+string linea_trace;
 string load_store;
 string Address;
 
-
+//Metodo Main
+//Parametros: recibe un vector con los parametros para crear el elemento de la clase cache que se usara para la simulacion
 int main(int argc, char* argv[]){
 
-  int TC = stoi(argv[2]);
-  int TB = stoi(argv[4]);
-  int V = stoi(argv[6]);
-  cache1 = new Cache(TC,TB,V);
+  int TC = stoi(argv[2]); // Se guarda el tamano del cache
+  int TB = stoi(argv[4]); // Se guarda el tamano del bloque
+  int V = stoi(argv[6]); // Se guarda el numero de vias
+  cache1 = new Cache(TC,TB,V); // Se crea el nuevo elemento de la clase cache con los parametros de entrada del programa
 
 
-  while (getline(cin, line))
+  while (getline(cin, linea_trace)) // Bucle while que lee una linea del cin y cuando se acaban las lineas se retorna false y se acaba el bucle
   {
-      line.erase(0,2);
-      stringstream linestream(line);
-      getline(linestream, load_store, ' ');
-      getline(linestream, Address, ' ');
-      Load_Store = stoi(load_store);
-      stringstream hexAddress(Address);
-      hexAddress>>hex>>AddressH;
-      cache1->check_addr(AddressH, Load_Store);
+      linea.erase(0,2); // se borrando el signo de # y de espacio al inicio de la lina del trace
+      stringstream linestream(linea_trace); // se convierte la linea del trace en un stringstream
+      getline(linestream, load_store, ' '); // se obtine el numero indiciador de Load_Store
+      getline(linestream, Address, ' '); // se obtiene la direccion
+      Load_Store = stoi(load_store); // se guarda el numero de Load_Store como un entero
+      stringstream hexAddress(Address); // el string que se contiene la direccion se hace un stringstream
+      hexAddress>>hex>>AddressH; // se convierte a hexadecimal la dirreccion
+      cache1->check_addr(AddressH, Load_Store); // se llama al metodo check_addr de la clase para revisar la instrucicon y su direccion
 
   }
 
@@ -76,7 +77,7 @@ int main(int argc, char* argv[]){
   //   cout << endl;/* code */
   // }
 //----------------------------------------------------------------------------
-
+// Se imprimen las estadisticas de la simualcion
 cout << "Cache Parameters:"<< '\n';
 cout << "Cache size (B):"  << dec << TC << '\n';
 cout << "Cache Associativity:" << dec << V << '\n';
