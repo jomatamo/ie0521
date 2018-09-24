@@ -2,7 +2,7 @@ Jose Andres Matamoros Murillo
 Carne B34093
 
 
-Simulador de cache parametrizable
+**Simulador de cache parametrizable**
 El siguiente programa es un simulador de cache parametrizable, donde se le puede
 cambia el tamano del cache, el tamano de bloque y la asosiatividad. El simulador recibe un trace por el stardard input con todas las lineas de las direcciones de
 memoria que se quieren accesar y el simulador se encarga de leerlas y empezar a
