@@ -20,4 +20,4 @@ El segundo comando agrega el repositorio al path temporalemente, por lo que el n
 **Simulacion**
 despues de ejecuado, se debe ejecutar el siguiente comando para realizar la simulacion:
 
-  gunzip *trace comprimido* | cache34093 -t *tamano cache en bytes* -l *tamano del bloque* -a *numero de vias*
+    gunzip *trace comprimido* | cache34093 -t *tamano cache en bytes* -l *tamano del bloque* -a *numero de vias*
