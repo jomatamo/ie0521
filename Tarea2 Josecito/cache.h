@@ -9,34 +9,37 @@ cache.h
 using namespace std;
 
 //La directiva struct se usaba en C para crear nuevos tipos.
-typedef struct Bloque{
-
-  long tag=0;
-  long index=0;
+typedef struct C_Block{
   int dirty_bit=0;
-  int vacio=1;
+  long Tag=0;
+  long Index=0;
+  int empty=1;
   int RRPV=3;
 
-}Bloque;
+}Block;
 
 class Cache {
 
 public:
-int contador_dirty_evictions = 0;
-int store_misses = 0;
-int store_hits = 0;
-int load_misses = 0;
-int load_hits=0;
-long index_mask, tag_mask;
-int bits_tag, bits_index, bits_offset;
-int vias;
-Bloque **Cabeza_vias;
 Cache(int, int, int);
 ~Cache(void);
-void verificar_dir(int, int);
-void reemplazar(int, int, int, int);
-void incrementar_RRPV(int);
-void victimizar(int, int, int);
+
+long mask_index, mask_tag;
+int dirty_evictions = 0;
+int load_misses = 0;
+int store_misses = 0;
+int load_hits=0;
+int store_hits = 0;
+int tag_bit_count, index_bit_count, offset_bit_count;
+int Assoc;
+Block **cache_head;
+
+
+
+void check_addr(int, int);
+void replace_block(int, int, int, int);
+void increase_RRPV(int);
+void victim(int, int, int);
 
 };
 #endif
