@@ -27,7 +27,7 @@ int main(int argc, char* argv[]){
 
   while (getline(cin, linea_trace)) // Bucle while que lee una linea del cin y cuando se acaban las lineas se retorna false y se acaba el bucle
   {
-      linea_trace.erase(0,2); // se borrando el signo de # y de espacio al inicio de la lina del trace
+      linea.erase(0,2); // se borrando el signo de # y de espacio al inicio de la lina del trace
       stringstream linestream(linea_trace); // se convierte la linea del trace en un stringstream
       getline(linestream, load_store, ' '); // se obtine el numero indiciador de Load_Store
       getline(linestream, Address, ' '); // se obtiene la direccion
@@ -79,7 +79,7 @@ int main(int argc, char* argv[]){
 //----------------------------------------------------------------------------
 // Se imprimen las estadisticas de la simualcion
 cout << "Cache Parameters:"<< '\n';
-cout << "Cache size (kB):"  << dec << TC/1000 << '\n';
+cout << "Cache size (B):"  << dec << TC << '\n';
 cout << "Cache Associativity:" << dec << V << '\n';
 cout << "Cache Block Size (B):" << dec << TB << '\n';
 cout << "Simulation Results:"<< '\n';
@@ -88,4 +88,6 @@ cout << "Store misses: " << dec << cache1->store_misses << '\n';
 cout << "Load hits: " << dec << cache1->load_hits << '\n';
 cout << "Load misses: " << dec << cache1->load_misses << '\n';
 cout << "Dirty evictions: " << dec << cache1->dirty_evictions <<'\n';
+
+
 }
