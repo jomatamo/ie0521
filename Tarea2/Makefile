@@ -1,5 +1,5 @@
 
-all: compile path
+all: compile 
 
 compile:
 	g++ -o  cacheB34093 cache.cpp main.cpp
