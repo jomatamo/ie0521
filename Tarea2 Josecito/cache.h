@@ -37,7 +37,7 @@ class Cache {
 
 //-------------------Metodos--------------------------------------------------
     void check_addr(int, int); //lee la linea del trace y verifica si la direccion esta en el cache, sino llama a replace_block o a victim
-    void replace_block(int, int, int, int); //agrega el bloque de la direccion al cache
+    void add_block(int, int, int, int); //agrega el bloque de la direccion al cache
     void increase_RRPV(int);// incrementa el valor de preddicion de reuso en 1 si al llamar a victim no hay un bloque que lo tenga en 3
     void victim(int, int, int);// metdodo que escoge cual bloque victimizar segun la politica de reemplazo
 
