@@ -12,8 +12,8 @@ para un index predertinado. El programa al final imprime la estasdiscticas de si
 **Compilacion de codigo**
 Para compilar el codigo se debe un utilizar en la consola:
 
-  make
-  PATH=$PATH:.
+    make
+    PATH=$PATH:.
 
 El segundo comando agrega el repositorio al path temporalemente, por lo que el nombre del ejecutable se cambio a cacheB34093
 
