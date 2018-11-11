@@ -79,7 +79,7 @@ int main(int argc, char* argv[]){
 //----------------------------------------------------------------------------
 // Se imprimen las estadisticas de la simualcion
 cout << "Cache Parameters:"<< '\n';
-cout << "Cache size (kB):"  << dec << TC/1000 << '\n';
+cout << "Cache size (kB):"  << dec << TC << '\n';
 cout << "Cache Associativity:" << dec << V << '\n';
 cout << "Cache Block Size (B):" << dec << TB << '\n';
 cout << "Simulation Results:"<< '\n';

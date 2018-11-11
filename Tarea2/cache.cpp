@@ -6,7 +6,13 @@
 //Metodo Contructor Cache
 // Parametros: int tamano del cache, int tamano del bloque, int associatividad(numero de vias)
 // Crea un elemento de la clase cache, inicializa todos sus atributos y genera la matriz de bloques de cache segun los parametros dados
-Cache::Cache(int cache_size, int b_size, int Assoc){
+Cache::Cache(int cache_size_in, int b_size, int Assoc){
+  int cache_1000 = cache_size_in*1000;
+  int cache_size = 2;
+  while (cache_1000 > cache_size) {
+    cache_size=cache_size*2;
+  }
+  // En este momento ya se tiene el tamaño real de cache.
 
   int block_count = cache_size/b_size/Assoc; // Se consigue el numero de bloques por via del cache
 
