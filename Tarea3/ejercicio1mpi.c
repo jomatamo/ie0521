@@ -16,7 +16,7 @@
 
 //-----------------------------------------------------------------------------
   if (my_id==root_process) { // Si es el proceso maestro
-    orden[0]=my_id:
+    orden[0]=my_id;
     // Se colecta la informacion que envia cada proceso sobre su id y se guarda en orden[8]
     for(an_id = 1; an_id < num_procs; an_id++) {
       ierr = MPI_Recv( &temp, 1, MPI_INT, an_id, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
