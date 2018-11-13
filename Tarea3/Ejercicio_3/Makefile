@@ -8,13 +8,13 @@ endif
 SOURCE = pi.c
 CC = gcc
 TARGET = pi
-FLAGS = -lpthread -lm
+FLAGS = -lpthread -lm -o
 
 
 all: build run
 
 build:
-	@$(CC) $(SOURCE) -o $(TARGET) $(FLAGS)
+	$(CC) $(SOURCE) $(FLAGS) $(TARGET)
 	@echo Ejecutable creado.
 
 run:

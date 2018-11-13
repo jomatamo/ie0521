@@ -31,7 +31,12 @@ void *partial_calc(void *args){
 pthread_t threads[100];
 suma_parcial sum_parc[100];
 
-int main(){
+int main(int argc, char *argv[]){
+  int thrds=atoi(argv[2]);
+  printf("%d\n",thrds );
+  // pthread_t *threads = (new)[];
+  pthread_t threads[100];
+  suma_parcial sum_parc[100];
 //Se incializan los structs con los limites superiores, inferiores y los resultados parciales.
   for (int i = 0; i < 100; i++) {
     sum_parc[i].inferior=i*1000000+1;
@@ -64,67 +69,7 @@ int main(){
 
 
   printf("Resultado total: %f\n",total);
-  //
-  //
-  //
-  //
-  //
-  //
-  // suma_parcial sum1;
-  // sum1.inferior=0;
-  // sum1.superior=5;
-  // sum1.resultado=0;
-  //
-  //
-  // suma_parcial sum2;
-  // sum2.inferior=6;
-  // sum2.superior=10;
-  // sum2.resultado=0;
-  //
-  // /* show the initial values of x and y *
-  //
-  // /* this variable is our reference to the second thread */
-  //
-  // pthread_t sumando1;
-  // pthread_t sumando2;
-  //
-  //
-  // /* create a second thread which executes inc_x(&x) */
-  // if(pthread_create(&sumando1, NULL, partial_calc, &sum1)) {
-  //
-  //   fprintf(stderr, "Error creating thread\n");
-  //   return 1;
-  //
-  // }
-  // if(pthread_create(&sumando2, NULL, partial_calc, &sum2)) {
-  //
-  //   fprintf(stderr, "Error creating thread\n");
-  //   return 1;
-  //
-  // }
-  //
-  //
-  //
-  //
-  //
-  //
-  // /* increment y to 100 in the first thread */
-  // if(pthread_join(sumando1, NULL)) {
-  //
-  //   fprintf(stderr, "Error joining thread\n");
-  //   return 2;
-  //
-  // }
-  //
-  // if(pthread_join(sumando2, NULL)) {
-  //
-  //   fprintf(stderr, "Error joining thread\n");
-  //   return 2;
-  //
-  // }
-  //
-  // /* show the results - x is now 100 thanks to the second thread */
-  // printf("resulado 1: %d, resultado 2: %d\n", sum1.resultado, sum2.resultado);
+
 
   return 0;
 
