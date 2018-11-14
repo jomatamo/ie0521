@@ -1,6 +1,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <math.h>
+#include <stdlib.h>
 
 
 float total=0;
@@ -23,24 +24,26 @@ void *partial_calc(void *args){
     total=total+4*powf(-1,(float)(i-1))/(2.0*((float)(i-1))+1.0);
     // printf("Resultado parcial %d\n",sum->resultado);
   }
-  printf("Resultado Parcial: %f\n",total);
+
+  // printf("Resultado Parcial: %f\n",total);
   pthread_mutex_unlock( &mutex1 );
   return NULL;
 }
 
-pthread_t threads[100];
-suma_parcial sum_parc[100];
 
 int main(int argc, char *argv[]){
-  int thrds=atoi(argv[2]);
-  printf("%d\n",thrds );
+  int thread_count = atoi(argv[2]);
+
+  // printf("%d\n",thread_count);
   // pthread_t *threads = (new)[];
-  pthread_t threads[100];
-  suma_parcial sum_parc[100];
+  // pthread_t threads[100];
+  // suma_parcial sum_parc[100];
+  pthread_t *threads = (pthread_t*)malloc(thread_count*sizeof(pthread_t*));
+  suma_parcial *sum_parc = (suma_parcial*)malloc(thread_count*sizeof(suma_parcial*));
 //Se incializan los structs con los limites superiores, inferiores y los resultados parciales.
-  for (int i = 0; i < 100; i++) {
-    sum_parc[i].inferior=i*1000000+1;
-    sum_parc[i].superior=(i*1000000)+1000000;
+  for (int i = 0; i < thread_count; i++) {
+    sum_parc[i].inferior=i*10000+1;
+    sum_parc[i].superior=(i*10000)+10000;
     printf("Suma Parcial %d\n",i);
     printf("Limite inferior: %d\n",sum_parc[i].inferior);
     printf("Limite Superior: %d\n",sum_parc[i].superior);
@@ -48,7 +51,7 @@ int main(int argc, char *argv[]){
 
   printf("-----fin de inicializacion de de limites de sumatorios---------------------------\n");
 
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < thread_count; i++) {
     if(pthread_create(&threads[i], NULL, partial_calc, &sum_parc[i])) {
 
       fprintf(stderr, "Error creating thread\n");
@@ -57,7 +60,7 @@ int main(int argc, char *argv[]){
     }
   }
 
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < thread_count; i++) {
     if(pthread_join(threads[i], NULL)) {
 
       fprintf(stderr, "Error joining thread\n");

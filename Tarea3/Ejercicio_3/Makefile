@@ -14,12 +14,12 @@ FLAGS = -lpthread -lm -o
 all: build run
 
 build:
-	$(CC) $(SOURCE) $(FLAGS) $(TARGET)
+	@$(CC) $(SOURCE) $(FLAGS) $(TARGET)
 	@echo Ejecutable creado.
 
 run:
 	@echo Ejecuntando ."\n"
-	@./$(TARGET)
+	@./$(TARGET) $(RUN_ARGS)
 
 
 
