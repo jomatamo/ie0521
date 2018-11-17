@@ -1,4 +1,5 @@
 #include <mpi.h>
+#include <stdio.h>
 
 int main(int argc, char **argv){
   int rank,root_process, ierr, size;
@@ -10,8 +11,8 @@ int main(int argc, char **argv){
 
 
 
-  ierr = MPI_Comm_rank(MPL_COMM_WORLD, &rank);
-  ierr = MPI_Comm_size(MPL_COMM_WORLD, &size);
+  ierr = MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  ierr = MPI_Comm_size(MPI_COMM_WORLD, &size);
 
   if(my_id % 2 == 0){
     printf("Hello! my ID is an even number. I am %d of %d\n",rank,size);
@@ -21,19 +22,6 @@ int main(int argc, char **argv){
 
   ierr = MPI_Finalize();
   return 0;
-
-
-
-
-
-}
-
-
-
-
-
-
-
 
 
 

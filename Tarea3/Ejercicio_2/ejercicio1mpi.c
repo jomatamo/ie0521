@@ -12,26 +12,29 @@
   ierr = MPI_Init(&argc, &argv);
 //------------------------------------------------------------------------------
   ierr = MPI_Comm_rank(MPI_COMM_WORLD, &my_id); // Se averigua el id del proceso
-  ierr = MPI_Comm_size(MPI_COMM_WORLD, &num_procs); // Se averigua el numero de procesos
+  printf("%d\n",my_id);
+  ierr = MPI_Comm_size(MPI_COMM_WORLD, &num_proc); // Se averigua el numero de procesos
 
 //-----------------------------------------------------------------------------
   if (my_id==root_process) { // Si es el proceso maestro
     orden[0]=my_id;
     // Se colecta la informacion que envia cada proceso sobre su id y se guarda en orden[8]
-    for(an_id = 1; an_id < num_procs; an_id++) {
-      ierr = MPI_Recv( &temp, 1, MPI_INT, an_id, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+    for(an_id = 1; an_id < num_proc; an_id++) {
+      ierr = MPI_Recv( &temp, 1, MPI_INT, an_id, 2000, MPI_COMM_WORLD, &status);
+
       orden[an_id]=temp; //El Id de cada proceso se guarda en orden en el arrary
 
     }
     // Se imprimen los ID en orden
     for (int i = 0; i < 8; i++) {
-      printf("Hello, World. I am %d of %d\n",i, num_procs);
+      printf("Hello, World. I am %d of %d\n",orden[i], num_proc);
     }
 //-----------------------------------------------------------------------------
   } else { // Si es uno de los procesos esclavos
     //Se envia el ID al root process
-    ierr = MPI_Send( &my_id, 1, MPI_INT, root_process, MPI_ANY_TAG, MPI_COMM_WORLD);
+    ierr = MPI_Send( &my_id, 1, MPI_INT, root_process, 2000, MPI_COMM_WORLD);
   }
+  ierr = MPI_Finalize();
 
   return 0;
 
