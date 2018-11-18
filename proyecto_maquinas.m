@@ -35,7 +35,7 @@ V1=1;
 Zth=(i*Xm*(R1+i*X1))/(R1+i*(X1+Xm));
 Rth=real(Zth);
 Xth=imag(Zth);
-
+H=0.5;
 
 
 
@@ -51,10 +51,27 @@ T_ind_20 = ((V1^2)*Xm^2*R2*(1.2)./s)./(((Rth+R2*(1.2)./s).^2+(Xth+X2)^2)*(R1^2+(
 
 T_ind_30 = ((V1^2)*Xm^2*R2*(1.3)./s)./(((Rth+R2*(1.3)./s).^2+(Xth+X2)^2)*(R1^2+(X1+Xm)^2));
 
-
+figure
+plot(w_r,T_ind)
+figure
 plot(w_r,T_ind,w_r,T_ind_10,w_r,T_ind_20,w_r,T_ind_30)
 
 
+%Modelo 2
+
+D = xss*xrr-xm^2;
+xrr = xlr+xm;
+xss = xls+xm;
+
+Tlmec=0.2;
+tspn = [0 0.8]
+y0 = [0 0 0 0 0];
+[t,y]=ode45(@(t,y) odefun(t,y,wb,xm,xrr,D,vqs,vdr,vqr,vds,rr,rs,H,Tlmec), tspn,y0);
+
+w_r_2=y(5);
+T_ind_2= (xm/D)*(y(1).*y(4)-y(3).*y(2);
 
 
 
+
+%T_ind = (xm/D)*(qs*dr-qr*ds);
