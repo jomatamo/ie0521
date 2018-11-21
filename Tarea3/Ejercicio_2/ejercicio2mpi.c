@@ -31,9 +31,9 @@ while(numero<maximo){//---------------------------------------------------------
       if(numero<maximo){
       numero++;
       // printf("Procesador 2: Incrementado, Valor Actual: %d\n",numero );
-    } else {
+      } else {
       // printf("Procesador 2: Valor maximo obtenido, Valor Actual: %d\n",numero );
-    }
+      }
 
       ierr = MPI_Send( &numero, 1, MPI_INT,0, 2000, MPI_COMM_WORLD);
       // printf("Procesador 2: Enviado, Valor Actual: %d\n",numero );
