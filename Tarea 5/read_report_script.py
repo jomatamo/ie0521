@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import re
 import glob
 
@@ -93,7 +93,7 @@ def cat_modules(a_percent,module,modules):
 for pathhier in glob.iglob('./hier/*.qor.rpt'):
 
     pathflat = re.sub(r'hier','flat',pathhier)
-    
+
     searchObj = re.search(r'.\/hier[\\|\/](.*)\.qor.rpt*',pathhier)
     if searchObj:
         name = searchObj.group(1)
