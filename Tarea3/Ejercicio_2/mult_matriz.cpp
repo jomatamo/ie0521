@@ -2,9 +2,10 @@
 #include <mpi.h>
 #include <iostream>
 using namespace std;
-
+#include <time.h>
 
 int main(int argc, char *argv[]) {
+  clock_t start5=clock();
   int COMPUTE = 10;
   int DONE = 15;
   int STOP=2;
@@ -46,13 +47,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  // for (int i = 0; i < matriz_size; i++) {
-  //   cout << "| ";
-  //   for (int j = 0; j < matriz_size; j++) {
-  //     cout << matriz[i][j]<<" ";
-  //   }
-  //   cout <<"|"<<endl;
-  // }
+
 
 
 //------------Se inicia la ejecucion paralela----------------------------------
@@ -66,7 +61,22 @@ int main(int argc, char *argv[]) {
   ierr =MPI_Comm_size(MPI_COMM_WORLD, &size); // Se averigua el id del procesos
 
 //-------------------------Procesador 0----------------------------------------
-
+  if (my_id==root_process) {
+    cout << "Matriz: " << endl;
+    for (int i = 0; i < matriz_size; i++) {
+       cout << "| ";
+       for (int j = 0; j < matriz_size; j++) {
+         cout << matriz[i][j]<<" ";
+       }
+       cout <<"|"<<endl;
+    }
+    cout << "Vector: " << endl;
+    cout << "| ";
+    for (int i = 0; i < matriz_size; i++) {
+      cout << vector[i]<<" ";
+    }
+    cout << "|" << endl;
+  }
   while(filas_disponibles>0){
     if (my_id==root_process) {
 //Se inicializan la matriz y el vector que se van a multiplicar
@@ -80,14 +90,14 @@ int main(int argc, char *argv[]) {
       for (int i = 0; i < matriz_size; i++) {
         resultado[cont_filas]=resultado[cont_filas]+matriz[cont_filas][i]*vector[i];
       }
-      cout << resultado[cont_filas] << endl;
+      //cout <<" Resultado parcial P0: " << resultado[cont_filas] << endl;
 
       filas_disponibles--;
       cont_filas++;
       cont_filas2++;
 
 
-      cout <<"Cantidad de iteraciones: " << iteraciones << endl;
+      //cout <<"Cantidad de iteraciones: " << iteraciones << endl;
 
       for (int i = 1; i < iteraciones; i++) {
         ierr = MPI_Send( matriz[cont_filas], matriz_size, MPI_INT,i, COMPUTE, MPI_COMM_WORLD);
@@ -103,7 +113,7 @@ int main(int argc, char *argv[]) {
       cout << "Filas disponibles:"<<filas_disponibles<<endl;
       for (int i = 1; i < iteraciones; i++) {
         ierr = MPI_Recv( &resultado[cont_filas2], 1, MPI_INT,i, DONE, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        cout << "Elemento del resultado "<<cont_filas2<<":"<<resultado[cont_filas2]<<endl;
+        //cout << "Elemento del resultado "<<cont_filas2<<":"<<resultado[cont_filas2]<<endl;
         cont_filas2++;
       }
       if (filas_disponibles == 0){
@@ -116,14 +126,14 @@ int main(int argc, char *argv[]) {
       MPI_Status stat;
       mult = 0;
       ierr= MPI_Probe(0,MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
-      cout << "Mensaje: "<< stat.MPI_TAG << endl;
+      //cout << "Mensaje: "<< stat.MPI_TAG << endl;
       if (stat.MPI_TAG == COMPUTE){
         ierr = MPI_Recv( temp, matriz_size, MPI_INT,0, COMPUTE, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        cout << "Procesador "<<my_id<<" recibi :";
-        for (int i = 0; i < matriz_size; i++) {
-          cout << temp[i] << " ";
-        }
-        cout << endl;
+        //cout << "Procesador "<<my_id<<" recibi :";
+        // for (int i = 0; i < matriz_size; i++) {
+        //   cout << temp[i] << " ";
+        // }
+        // cout << endl;
         for (int i = 0; i < matriz_size; i++) {
           mult=mult+(temp[i]*vector[i]);
         }
@@ -135,10 +145,13 @@ int main(int argc, char *argv[]) {
     }
   }
   if (my_id==root_process) {
+    cout << "Vector resultante: " << endl;
+    cout << "| ";
     for (int i = 0; i < matriz_size; i++) {
       cout << resultado[i] << " ";
     }
-    cout << endl;
+    cout << "|" <<endl;
+    cout<<"Tiempo de ejecución:  " <<((double)clock()-start5)/CLOCKS_PER_SEC << " s"<< endl;
   }
 //----------------------------------------------------------------------------
   ierr = MPI_Finalize();

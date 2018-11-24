@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-
+#include <time.h>
 
 float total=0;
 pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
@@ -17,21 +17,25 @@ void *partial_calc(void *args){
   suma_parcial *sum = (suma_parcial *)args;
   // printf("Limite inferior: %d\n", sum-> inferior);
   // printf("Limite superior: %d\n", sum-> superior);
-  pthread_mutex_lock( &mutex1 );
+  float resultado_parcial =0;
+
 
   for (int i = (sum->inferior); i <=(sum->superior); i++) {
 
-    total=total+4*powf(-1,(float)(i-1))/(2.0*((float)(i-1))+1.0);
+    resultado_parcial=resultado_parcial+4*powf(-1,(float)(i-1))/(2.0*((float)(i-1))+1.0);
     // printf("Resultado parcial %d\n",sum->resultado);
   }
-
-  // printf("Resultado Parcial: %f\n",total);
+  printf("Resultado Parcial: %.*f\n",10,resultado_parcial);
+  pthread_mutex_lock( &mutex1 );
+  total=total+resultado_parcial;
+  //printf("Resultado Parcial: %f\n",total);
   pthread_mutex_unlock( &mutex1 );
   return NULL;
 }
 
 
 int main(int argc, char *argv[]){
+  clock_t start5=clock();
   int thread_count = atoi(argv[2]);
 
   // printf("%d\n",thread_count);
@@ -42,8 +46,8 @@ int main(int argc, char *argv[]){
   suma_parcial *sum_parc = (suma_parcial*)malloc(thread_count*sizeof(suma_parcial*));
 //Se incializan los structs con los limites superiores, inferiores y los resultados parciales.
   for (int i = 0; i < thread_count; i++) {
-    sum_parc[i].inferior=i*10000+1;
-    sum_parc[i].superior=(i*10000)+10000;
+    sum_parc[i].inferior=i*100000+1;
+    sum_parc[i].superior=(i*100000)+100000;
     printf("Suma Parcial %d\n",i);
     printf("Limite inferior: %d\n",sum_parc[i].inferior);
     printf("Limite Superior: %d\n",sum_parc[i].superior);
@@ -51,7 +55,7 @@ int main(int argc, char *argv[]){
 
   printf("-----fin de inicializacion de de limites de sumatorios---------------------------\n");
 
-  for (int i = 0; i < thread_count; i++) {
+  for (int i = 0; i < thread_count; i++) { // Se inicializan los threads pasando los structs con los limites.
     if(pthread_create(&threads[i], NULL, partial_calc, &sum_parc[i])) {
 
       fprintf(stderr, "Error creating thread\n");
@@ -71,8 +75,8 @@ int main(int argc, char *argv[]){
   printf("------------------------------------------------------------------\n");
 
 
-  printf("Resultado total: %f\n",total);
-
+  printf("Resultado total: %.*f\n",10,total);
+  printf("Tiempo de ejecución: %.*f s\n",10,((double)clock()-start5)/CLOCKS_PER_SEC);
 
   return 0;
 

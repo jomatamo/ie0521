@@ -1,8 +1,8 @@
 /*********************************************************************
 cache.h
 **********************************************************************/
-#ifndef CLASECPU
-#define CLASECPU
+#ifndef CLASECPUS
+#define CLASECPUS
 
 #include<string>
 #include<iostream>
@@ -19,38 +19,47 @@ typedef struct C_Block{
 
 }Block;
 
-class CPU {
+class CPUs {
 
   public:
-    CPU(); //Constructuror de la clase
-    ~CPU(void); // destructor de la clase
+    CPUs(); //Constructuror de la clase
+    ~CPUs(void); // destructor de la clase
+
 //----------------Atributos----------------------------------------------------
-    long mask_index, mask_tag; //Variables Long que contienen las mascaras para comparar index y tag de la direccion del trace
+    long mask_index=0;
+    long mask_tag=0; //Variables Long que contienen las mascaras para comparar index y tag de la direccion del trace
+    long mask_indexL2 =0;
+    long mask_tagL2 = 0;
     int invalid_CPU1 = 0; // Contador de invalidaciones por coherencia CPU1
     int invalid_CPU2 = 0; // Contador de invalidaciones por coherencia CPU2
-    int misses = 0; // contador de misses
-    int hits=0; // Cantidad de hits
-    int hits_L1P1=0;
+    int global_misses = 0; // contador de misses
+    int hits_globales=0; // Cantidad de hits
     int misses_L1P1=0;
+    int hits_L1P1=0;
     int hits_L1P2=0;
     int misses_L1P2=0;
     //int store_hits = 0; //Cantidad de misses por Loads
-    int tag_bit_count, index_bit_count, offset_bit_count; //Cantidad de bits de tag, index y de offser
-    int Assoc; //Numero de vias del cache
-    Block **L1P1_head;// Puntero que apunta a la matriz que contedra los los bloques de cache
-    Block **L1P2_head;
-    Block **L2_head;
+    Block **L1P1_head = NULL;// Puntero que apunta a la matriz que contedra los los bloques de cache
+    Block **L1P2_head = NULL;
+    Block *L2_head = NULL;
     int bits_offset=0;
     int bits_tag=0;
     int bits_index=0;
+    int bits_offsetL2=0;
+    int bits_tagL2=0;
+    int bits_indexL2=0;
+
 
 
 //-------------------Metodos--------------------------------------------------
-    void check_addr(int, int); //lee la linea del trace y verifica si la direccion esta en el cache, sino llama a replace_block o a victim
+    void check_addr(int, int, int); //lee la linea del trace y verifica si la direccion esta en el cache, sino llama a replace_block o a victim
     //void add_block(int, int, int, int); //agrega el bloque de la direccion al cache
     //void increase_RRPV(int);// incrementa el valor de preddicion de reuso en 1 si al llamar a victim no hay un bloque que lo tenga en 3
     //void victim(int, int, int);// metdodo que escoge cual bloque victimizar segun la politica de reemplazo
-    void reemplazar();
+    void revisar_coherencia(int,int,int,int,int);
+    void victimizar(int, int,int,int);
+    void es_miss(int,int,int,int,int);
+
 
 };
 #endif

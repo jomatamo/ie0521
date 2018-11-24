@@ -1,154 +1,337 @@
-#include"cache.h"
+#include"cpu.h"
 #include"math.h"
 #include"cmath"
 #include <bitset>
 
 
-Cache::CPU(void){
+CPUs::CPUs(void){
+// Se definen los estados para coherencia
+  int M=0;
+  int E=1;
+  int S=2;
+  int I=3;
 
-  //Se crea la matriz con bloques del chache
+  //Se crea la matriz con bloques del cache L1P1
   this->L1P1_head= new Block*[2]; // Se le asiga a cache_head un vector de punteros a bloque del tamano de la vias
   for (int i = 0; i < 2; i++) {
     this->L1P1_head[i]= new Block[256]; // a cada uno de esos punteros se le asigna un vector del tamano del numero de bloques por via
-
-  }
-  // Se llena el los bloques con su index respectivo
-  for (int j = 0; j < 256; j++) {
-    for (int i = 0; i < 2; i++) {
-      this->L1P1_head[i][j].Index=j;
-      this->L1P2_head[i][j].Index=j;
-    }/* code */
   }
 
-this->L2_head= new Block*[1];
-for (int i = 0; i < 1; i++) {
-  this->L2_head[i]= new Block[256];
-}
-  //  Calculo de bits de index
-  //float block_count_float = (float)block_count; // Se convierte a float el numero de bloques por via
-//  this->index_bit_count = (int)(log2(block_count_float)); // Se le asigna a index_bit_count la cantidad de bits del index
-  // Calculo de bits de offset
-  //float b_size_float = (float)b_size;
-  //this->offset_bit_count = (int)(log2(b_size_float)); // Se calculan la cantidad de bits de offset
-  //int hola[100];
-  //int *hola = new int[100]
-  //int **hola = new int*[10];
-//  this->Assoc=Assoc; // Se le asigna a Assoc la cantidad de vias
+  //Se crea la matriz con bloques del cache L1P2
+  this->L1P2_head = new Block*[2]; // Se le asiga a cache_head un vector de punteros a bloque del tamano de la vias
+  for (int i = 0; i < 2; i++) {
+    this->L1P2_head[i]= new Block[256]; // a cada uno de esos punteros se le asigna un vector del tamano del numero de bloques por via
+  }
+
+  this->L2_head= new Block[4096];
 
   //Bits para L1.
   this->bits_index=8;
   this->bits_offset= 5;
   this->bits_tag = 32-this->bits_offset-this->bits_index;
 
-  //Se crea la mascara de comparacion de index:
+  //Se crea la mascara de comparacion de index de L1:
+  //cout << bitset<32>(this->mask_index) << endl;
   for (int i = 0; i < this->bits_index; i++) {
     this->mask_index = this->mask_index << 1;
     this->mask_index = this->mask_index + 1;
+
   }
+
   this->mask_index = this->mask_index << this->bits_offset;
+//cout << bitset<32>(this->mask_tag) << endl;
 //--------------------------------------------------------------------------
-  //Se crea la mascara de comparacion de tags
-  for (int i = 0; i < this->tag_bit_count; i++) {
+  //Se crea la mascara de comparacion de tags de L1
+  for (int i = 0; i < this->bits_tag; i++) {
     this->mask_tag = this->mask_tag << 1;
     this->mask_tag = this->mask_tag + 1;
   }
-  this->mask_tag = this->mask_tag << (this->offset_bit_count+this->index_bit_count);
+  this->mask_tag = this->mask_tag << (this->bits_offset+this->bits_index);
 //----------------------------------------------------------------------------
 
+// mascaras de L2------------------------------------------------------------
+this->bits_indexL2=12;
+this->bits_offsetL2= 5;
+this->bits_tagL2 = 32-this->bits_offsetL2-this->bits_indexL2;
+
+//Se crea la mascara de comparacion de index:
+//cout << bitset<32>(this->mask_indexL2) << endl;
+for (int i = 0; i < this->bits_indexL2; i++) {
+  this->mask_indexL2 = this->mask_indexL2 << 1;
+  this->mask_indexL2 = this->mask_indexL2 + 1;
 }
-//Destructor de la clase
-CPU::~CPU(void){
+this->mask_indexL2 = this->mask_indexL2 << this->bits_offsetL2;
+//--------------------------------------------------------------------------
+//Se crea la mascara de comparacion de tags
+//cout << bitset<32>(this->mask_tagL2) << endl;
+for (int i = 0; i < this->bits_tagL2; i++) {
+  this->mask_tagL2 = this->mask_tagL2 << 1;
+  this->mask_tagL2 = this->mask_tagL2 + 1;
+}
+this->mask_tagL2 = this->mask_tagL2 << (this->bits_offsetL2+this->bits_indexL2);
+//
+
 
 }
-// Metodo check_addr
-// Parametos: int addr, son las direcciones de memoria del trace, int LS es in entero que indica si la direccion es un load o un store, 0 si es Load, 1 si es Store
-// El metodo se encarga de leer las direcciones que vienen en addrs, y revisar si esos tag estan en el cache, si estan es un hit, sino se verifica si el bloque esta vacio o lleno, dependiendo del resultado de procede a agregar el bloque o a victimizar uno
-void CPU::check_addr(int addr, int RW){
 
-  int addr_index = (addr & this->mask_index) >> this->offset_bit_count ; // Se consige el index de la direccion comparando con la mascara de index
-  int addr_tag = (addr & this->mask_tag) >> (this->offset_bit_count+this->index_bit_count); // se consigue el tag de la direccion comparando con la mascara de tag
-  int assoc_counter=0; // Se inicializa el contador que va a recorrer las vias para verificar si para el index de la dirrecion se puede guardar
+CPUs::~CPUs(void){
 
-  while (assoc_counter < this->Assoc) { // bucle que recorre las vias
+}
+//-------------Funcion check_addr---------------------------------------------//
+void CPUs::check_addr(int addr, int RW,int int_cntr){
+ //cout << "Estoy leyendo la direccion" << endl;
+ //std::cout << "Instruccion: " << RW << '\n';
+ // cout << hex << addr << endl;
+  int M=0;
+  int E=1;
+  int S=2;
+  int I=3;
+// Se consigue el index de la direccion y el tag usando las mascaras
+  int addr_index = (addr & this->mask_index) >> this->bits_offset ;
+  int addr_tag = (addr & this->mask_tag) >> (this->bits_offset+this->bits_index);
 
-    if (this->cache_head[assoc_counter][addr_index].empty==1) { // se revisa si para esa posicion en la matriz de bloques esta vacia,
+  //cout << "Tag: " << bitset<19>(addr_tag) << endl;
+  //cout << "index: " << bitset<8>(addr_index) << endl;
+//--------------Se pregunta si la instruccion es para  CPU 1--------------------------
+  if (int_cntr<4) {
+    bool hit_vias_L1 = false;
 
-     this->add_block(assoc_counter, addr_index, addr_tag, LS); // si lo esta re agrega al bloque al cache
-     if (LS==0) { // Si LS  es un 0 se suma 1 al contador de misses de load
-       load_misses++;
-     } else {
-       store_misses++; // Si es un 1 se incrementa el contador de misses de store
-     }
-     break; // se sale del bucle
-    } else { // si el bloque no esta vacio
-      if (this->cache_head[assoc_counter][addr_index].Tag == addr_tag ) { // se verifica que el tag sea igual
-        if (LS==0) { // si el tag es igual es un 1, se suma 1 a los contadores de hits dependiendo de LS
-          load_hits++;
-        } else {
-          store_hits++;
-          this->cache_head[assoc_counter][addr_index].dirty_bit=1; // Si es un hit de Store, el dirty bit del cache se pone en 1
+    // Se va a revisar que ese sea hit en L1------------------------------------------
+    for (int i = 0; i < 2; i++) { // Se itera sobre las dos vias
+      //cout <<"todo bien 13"<<endl;
+      if (this->L1P1_head[i][addr_index].Tag==addr_tag) { // Se pregunta si esta en la via
+
+        if (this->L1P1_head[i][addr_index].coherencia !=I){ // Si no esta envalidado en
+          hit_vias_L1 = true;
+          //cout << "Es un hit en L1P1, voy a revisar coherencia" << endl;
+          this->hits_L1P1++;
+          this->revisar_coherencia(1,i,addr_index,addr_tag,RW);
         }
-        this->cache_head[assoc_counter][addr_index].RRPV = 0;  // En hit se le asigna un RRPV de 0 al bloque
-        break; // se sale del bucle
-      } else{ // si no esta vacio y el tag es diferente se pasa a la siguiente via
-        assoc_counter++;
       }
     }
-    if (assoc_counter == this->Assoc) { // si el contador llega a ser mismo que el numero de vias se recorrienron todas la vias, por lo que estaban todas ocupabadas y no se dieron hits
-      this->victim(addr_index, addr_tag, LS); // Se llama al metodo victimizar para reemplazar un bloque dependiendo de la politica de reemplazo
-      if (LS==0) { // Se suman 1 a los contadores misses dependiendo de la instruccion
-        load_misses++;
+    if (!hit_vias_L1){
+      //cout << "Es un miss en L1P1" << endl;
+      this->misses_L1P1++;
+      this->es_miss(addr,1,addr_index,addr_tag,RW); // Se llama la funcion miss
+
+    }
+//--------------Se pregunta si la instruccion es para CPU 2---------------------------
+  } else {
+    bool hit_vias_L1 = false;
+    // Se va a revisar que ese sea hit en L2------------------------------------------
+    for (int i = 0; i < 2; i++) { // Se itera sobre las dos vias
+      if (this->L1P2_head[i][addr_index].Tag==addr_tag) { // Se pregunta si esta en la via
+        if (this->L1P2_head[i][addr_index].coherencia !=I){ // Si no esta envalidado en
+          hit_vias_L1 = true;
+          //cout << "Es un hit de L1P2, voy a revisar coherencia." << endl;
+          this->hits_L1P2++;
+          this->revisar_coherencia(2,i,addr_index,addr_tag,RW);
+        }
+      }
+    }
+    if (!hit_vias_L1){
+      //cout << "Es un miss en L1P2" << endl;
+      this->misses_L1P2++;
+      this->es_miss(addr,2,addr_index,addr_tag,RW); // Se llama la funcion miss
+    }
+  }
+}
+//---------------Funcion es_miss ---------------------------------------------//
+void CPUs::es_miss(int addr, int CPU, int addr_index,int addr_tag, int RW){
+// Se consigue el index de la direccion y el tag usando las mascaras
+  int addr_indexL2 = (addr & this->mask_indexL2) >> this->bits_offsetL2 ;
+  int addr_tagL2 = (addr & this->mask_tagL2) >> (this->bits_offsetL2+this->bits_indexL2);
+
+  if (CPU==1) { // Si el miss se dio en el cache 1
+    //cout << "Victimizando un bloque:" << endl;
+    this->victimizar(1,addr_index,addr_tag,RW);
+    //cout << "Logre victimizar con exito." << endl;
+  } else if (CPU==2){
+    //cout << "Victimizando un bloque:" << endl;
+    this->victimizar(2,addr_index,addr_tag,RW);
+    //cout << "Logre victimizar con exito." << endl;
+  }
+
+  if (this->L2_head[addr_indexL2].Tag != addr_tagL2 || this->L2_head[addr_indexL2].coherencia == 3 ) {
+    //cout << "Es miss de L2." << endl;
+    this->global_misses++;
+    this->L2_head[addr_indexL2].Tag= addr_tagL2; // Si el bloque esta en el L2
+    // Si el bloque se encontro ahora hay que pasarlo a L1, por eso se tiene que verificar la politica de reemplazo y una vez que se hace el reemplazo se revisa la coherencia con el otro cache L1
+    //cout << "Trayendo de memoria principal"<<endl;
+      this->L2_head[addr_indexL2].coherencia = 1; //E
+  } else {
+    //cout << "Es hit en L2" <<endl;
+    this->hits_globales++;
+  }
+}
+//--------------Funcion revisar coherencia------------------------------------//
+void CPUs::revisar_coherencia(int CPU,int via, int addr_index, int addr_tag, int RW){
+//-------------------------------Procesador 1-------------------------------------------
+  int M=0;
+  int E=1;
+  int S=2;
+  int I=3;
+  //cout << "Instruccion para coherecia: " << RW << endl;
+  if (CPU==1) { // Si la funcion la realiza el procesador 1
+    bool found_L1P2 = false;
+    int hit_via;
+    //cout << "Voy a revisar coherencia" << endl;
+    //cout << "Index de la direccion: " << bitset<8>(addr_index) << endl;
+    //cout << "Tag de la dirrcion: " << bitset<19>(addr_tag) << endl;
+
+
+    for (int j = 0; j < 2; j++) { // Se revisa en cual de las dos vias esta en  L1P2
+    //cout << "Revisando via en L1P2: "<<j << '\n';
+      if (this->L1P2_head[j][addr_index].Tag==addr_tag&&this->L1P2_head[j][addr_index].coherencia!=I){ // Se revisa el tag y que la coherencia sea diferente de invalido
+        hit_via=j; // si el tag es el mismo, se india en cual via hubo hit
+        found_L1P2 = true; // Se indica que se encontro el tag
+        //cout << "Encontre la via " << '\n';
       } else {
-        store_misses++;
+        ////cout << "No era en esa via " << '\n';
       }
     }
-  }
-}
-
-//Metodo add_block
-//Parametros: int via, donde es la via donde se va a agregar el bloque
-//            int index, index del bloque que se va agregar
-//            int tag, tag del bloque que contiene la direccion
-//            int db, el dirty bit del bloque a insertar dependiendo de la intruccion
-// Agrega un bloque al cache ubicando su posicion con la via y el index, y le asigna sus atributos respectivos al bloque
-
-void Cache::add_block(int via, int index, int tag, int db){ // se usa la via y el indez para ubicar el bloque
-  this->cache_head[via][index].Tag=tag;
-  this->cache_head[via][index].empty=0; // el bloque se inserta esta ocupado
-  this->cache_head[via][index].RRPV=2; // siempre se insertan nuevos bloques con RRPV de 2
-  this->cache_head[via][index].dirty_bit=db; // Se le asigna el tipo de instrucicon del bloque
-
-}
-//Metodo victim
-//Parametros: int index, recibe el index del bloque de la dirrecion que se quiere agregar
-//            int tag, recibe el tag del bloque de la direccion que se quiere agregar
-//            int db, recibe el tipo de instruccion del bloque que se va a agregar
-//Se encarga de revisar las vias para un index dado, y revisa sus RRPV, si es 3 ese bloque es el que se va a reemplazar, sino hay una via con un RRPV de 3 se le suma 1 a todos los RRPV de todas las vias para ese index
-void Cache::victim(int index, int tag, int db){
-  int assoc_counter=0; // se inicializa el contador de vias
-  while (true) { // se inciia un bucle infinito
-    if (assoc_counter==this->Assoc) { // si se recorriendo todas las vias y no de encontro uno con RRPV de 3
-      increase_RRPV(index); // se llama al metodo de increase_RRPV
-      assoc_counter=0; // se reinicia el contador para verificador de nuevo
-    }
-    if (this->cache_head[assoc_counter][index].RRPV == 3) { // Si la para la via del contador si tiene un RRPV de 3
-      if (this->cache_head[assoc_counter][index].dirty_bit ==1) { // Se revisa si el db del bloque a reemplazar es 1
-        dirty_evictions ++; // si lo es se incrementa el contador de dirty_evictions en 1
+    //cout << "Logre revisar bien L1P2." << '\n';
+    if(found_L1P2){ // Si se encontro el bloque en alguna de las dos vias de L1P2
+      //cout << "El bloque si estaba en L1P2" << '\n';
+      //cout << "Estado de coherencia del bloque en P1: " << this->L1P1_head[hit_via][addr_index].coherencia << endl;
+      //cout << "Estado de coherencia del bloque en P2: " << this->L1P2_head[hit_via][addr_index].coherencia << endl;
+      if (RW==0){ // Si la instruccion es una lectura
+        this->L1P1_head[via][addr_index].coherencia = S;
+        this->L1P2_head[hit_via][addr_index].coherencia = S;
+      } else { // Si es la instruccion es una escritura:
+        this->L1P1_head[via][addr_index].coherencia = M;
+        this->L1P2_head[hit_via][addr_index].coherencia = I;
+        this->invalid_CPU2++;
       }
-      this->add_block(assoc_counter, index, tag, db); // Se agrega el nuevo bloque en esa posicion
-      break; // se sale del ciclo
-    } else {
-      assoc_counter++; // si no se cumplen las codiciones se mantiene aumentando el contador
+      //cout << "Estado de coherencia del bloque en P1: " << this->L1P1_head[via][addr_index].coherencia << endl;
+      //cout << "Estado de coherencia del bloque en P2: " << this->L1P2_head[hit_via][addr_index].coherencia << endl;
+    } else { // Si no se encontro el bloque en L1P2
+      //cout << "No se encontraba en L1P2" << endl;
+
+      if (RW==0){ // Si la instruccion es una lectura
+          this->L1P1_head[via][addr_index].coherencia = E;
+          //cout << "Estado de coherencia del bloque en P1: " << this->L1P1_head[via][addr_index].coherencia << endl;
+      } else {
+        //cout << "Modificando: " << endl;
+        this->L1P1_head[via][addr_index].coherencia = E;
+        //cout << "Estado de coherencia del bloque en P1: " << this->L1P1_head[via][addr_index].coherencia << endl;
+      }
+
     }
+    //cout << "Logre revisar bien las coherencias." << endl;
+
+
+//---------------------------------Procesador 2------------------------------------
+  } else if (CPU==2){ // Si la funcion la llama el procesador 2
+    bool found_L1P1 = false;
+    int hit_via;
+    //cout << "Voy a revisar coherencia" << endl;
+    //cout << "index: " << bitset<8>(addr_index) << endl;
+    //cout << "tag: " << bitset<19>(addr_tag) << endl;
+    for (int j = 0; j < 2; j++) { // Se revisa en cual de las dos vias esta en  L1P1
+      //cout << "Revisando via en L1P1: "<<j << '\n';
+      if (this->L1P1_head[j][addr_index].Tag==addr_tag &&this->L1P1_head[j][addr_index].coherencia!=I){ // Se revisa el tag
+        hit_via=j; // si el tag es el mismo, se india en cual via hubo hit
+        found_L1P1 = true; // Se indica que se encontro el tag
+        //cout << "Encontre la via." << endl;
+      } else {
+        //cout << "No era en esa via " << '\n';
+      }
+    }
+    //cout << "Logre revisar bien L1P1." << '\n';
+    if(found_L1P1){ // Si se encontro el bloque en alguna de las dos vias de L1P2
+      //cout << "El bloque si estaba en L1P1" << '\n';
+      //cout << "Estado de coherencia del bloque en P1: " << this->L1P1_head[hit_via][addr_index].coherencia << endl;
+      //cout << "Estado de coherencia del bloque en P2: " << this->L1P2_head[hit_via][addr_index].coherencia << endl;
+      if (RW==0){ // Si la instruccion es una lectura
+          this->L1P2_head[via][addr_index].coherencia = S;
+          this->L1P1_head[hit_via][addr_index].coherencia = S;
+
+      } else { // Si es la instruccion es una escritura:
+        this->L1P2_head[via][addr_index].coherencia = M;
+        this->L1P1_head[hit_via][addr_index].coherencia = I;
+        this->invalid_CPU1++;
+      }
+      //cout << "Estado de coherencia del bloque en P2: " << this->L1P2_head[via][addr_index].coherencia << endl;
+      //cout << "Estado de coherencia del bloque en P2: " << this->L1P1_head[hit_via][addr_index].coherencia << endl;
+    } else { // Si no se encontro el bloque en L1P2
+      //cout << "No estaba en L1P1" << '\n';
+
+      if (RW==0){ // Si la instruccion es una lectura
+          this->L1P2_head[via][addr_index].coherencia = E;
+          //cout << "Estado de coherencia del bloque en P2: " << this->L1P2_head[via][addr_index].coherencia << endl;
+      } else {
+        //cout << "Modficiando:" << endl;
+        this->L1P2_head[via][addr_index].coherencia = M;
+        //cout << "Estado de coherencia del bloque en P2: " << this->L1P2_head[via][addr_index].coherencia << endl;
+      }
+    }
+    //cout << "Logre revisar bien las coherencias. Estados finales: " << endl;
   }
 }
-//Metodo increase_RRPV
-//Parametos: int index, index para el cual se van a recorrer todas las vias de ese index
-// El metodo se encarga de recorrer todas las vias para el index de entrada e incrementar el RRPV de cada bloque en 1 si este es dirente de 3
-void Cache::increase_RRPV(int index){
-  for ( int i = 0; i < this->Assoc; i++) {
-    if (this->cache_head[i][index].RRPV != 3) {
-      this->cache_head[i][index].RRPV ++;
+//--------------Funcion victimizar--------------------------------------------//
+void CPUs::victimizar(int CPU, int addr_index,int addr_tag,int RW){
+  if (CPU==1) { // Si es el procesador 1 el que va a victimizar
+    //cout << "Victimizando en P1." << endl;
+    int via_victimizar;
+    //cout << "Revisando las vias para victimizar, para el index: " << bitset<8>(addr_index)<< endl;
+    //cout << "Tag: " << bitset<19>(addr_tag)<< endl;
+    for (int i = 0; i < 2; i++) { // Se revisan las vias
+      //cout << "Revisand la via "<< i << '\n';
+      if(this->L1P1_head[i][addr_index].LRU==0){ // Si en una via se tiene el LRU en 0
+        via_victimizar = i; // Se guarda cual via es
+      }
     }
+    //cout << " Vias revisadas la via para victimizar es: "<< via_victimizar <<endl;
+
+    // for (int i = 0; i < 2; i++) {
+    //    // Se le asigna el nuevo tag al bloque
+    //   if (this->L1P1_head[i][addr_index].Tag=addr_tag) {
+    //     if (this->L1P1_head[i][addr_index].coherecia != addr_tag) {
+    //   }
+    // }
+
+
+    this->L1P1_head[via_victimizar][addr_index].Tag=addr_tag; // Se le asigna el nuevo tag al bloque
+
+    if (via_victimizar == 0) {
+      this->L1P1_head[via_victimizar][addr_index].LRU=1; // Se le asignan los nuevos valores de LRU
+      this->L1P1_head[1][addr_index].LRU=0;
+    }
+    if (via_victimizar == 1) {
+      this->L1P1_head[via_victimizar][addr_index].LRU=1;
+      this->L1P1_head[0][addr_index].LRU=0;
+    }
+
+    //cout << "Valor de LRU para via 0: "<< this->L1P1_head[0][addr_index].LRU << endl;
+    //cout << "Valor de LRU para via 1: "<< this->L1P1_head[1][addr_index].LRU << endl;
+      //Ahora se procede a actualizar los valores de coherencia, revisa si en el otro cache L1P2 esta en bloque.
+    this->revisar_coherencia(1,via_victimizar,addr_index,addr_tag,RW);
+
+  } else if (CPU==2){
+    int via_victimizar;
+    //cout << "Victimizando en P2." << endl;
+    //cout << "Revisando las vias para victimizar, para el index: " << bitset<8>(addr_index)<< endl;
+    //cout << "Tag: " << bitset<8>(addr_tag)<< endl;
+    for (int i = 0; i < 2; i++) { // Se revisan las vias
+      //cout << "Revisando la via "<< i << '\n';
+      if(this->L1P2_head[i][addr_index].LRU==0){ // Si en una via se tiene el LRU en 0
+        via_victimizar = i; // Se guarda cual via es
+      }
+    }
+    //cout << " Vias revisadas la via para victimizar es: "<< via_victimizar <<endl;
+    this->L1P2_head[via_victimizar][addr_index].Tag=addr_tag; // Se le asigna el nuevo tag al bloque
+    if (via_victimizar == 0) {
+      this->L1P2_head[via_victimizar][addr_index].LRU=1; // Se le asignan los nuevos valores de LRU
+      this->L1P2_head[1][addr_index].LRU=0;
+    }
+    if (via_victimizar == 1) {
+      this->L1P2_head[via_victimizar][addr_index].LRU=1;
+      this->L1P2_head[0][addr_index].LRU=0;
+    }
+      //Ahora se procede a actualizar los valores de coherencia, revisa si en el otro cache L1P2 esta en bloque.
+    //cout << "Valor de LRU para via 0: "<< this->L1P2_head[0][addr_index].LRU << endl;
+    //cout << "Valor de LRU para via 1: "<< this->L1P2_head[1][addr_index].LRU << endl;
+    this->revisar_coherencia(2,via_victimizar,addr_index,addr_tag,RW);
   }
 }
