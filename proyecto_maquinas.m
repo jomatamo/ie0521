@@ -1,8 +1,3 @@
-
-
-
-
-%s = 0:1/5000:100; %vector de deslizamiento
 %Parametros del motor
 f=60; %frecuencia
 P=6;  %Polos
@@ -31,33 +26,20 @@ Xm= 2.042;
 xm=Xm;
 H=0.5;
 V1=1;
-
-
 Zth=(i*Xm*(R1+i*X1))/(R1+i*(X1+Xm));
 Rth=real(Zth);
 Xth=imag(Zth);
 
-
-
 %Modelo 1
 
-
 T_ind = ((V1^2)*Xm^2*R2./s)./(((Rth+R2./s).^2+(Xth+X2)^2)*(R1^2+(X1+Xm)^2));
-
 T_ind_10 = ((V1^2)*Xm^2*R2*(1.1)./s)./(((Rth+R2*(1.1)./s).^2+(Xth+X2)^2)*(R1^2+(X1+Xm)^2));
-
 T_ind_20 = ((V1^2)*Xm^2*R2*(1.2)./s)./(((Rth+R2*(1.2)./s).^2+(Xth+X2)^2)*(R1^2+(X1+Xm)^2));
-
-
 T_ind_30 = ((V1^2)*Xm^2*R2*(1.3)./s)./(((Rth+R2*(1.3)./s).^2+(Xth+X2)^2)*(R1^2+(X1+Xm)^2));
-
-
 figure
 plot(w_r,T_ind,w_r,T_ind_10,w_r,T_ind_20,w_r,T_ind_30)
 
-
 %Modelo 2
-
 
 xrr = xlr+xm;
 xss = xls+xm;
@@ -66,7 +48,6 @@ vqs=1;
 vds=0;
 vqr=0;
 vdr=0;
-
 Tlmec=0.1;
 tspn = [0 0.8];
 y0 = [0 0 0 0 0];
@@ -80,8 +61,3 @@ figure
 plot(t,T_ind_2)
 figure
 plot(w_r,T_ind,wrpu,T_ind_2)
-
-
-
-
-%T_ind = (xm/D)*(qs*dr-qr*ds);
