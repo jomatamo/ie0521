@@ -114,6 +114,13 @@ int main(int argc, char* argv[]){
 //     }
 //     cout << endl;/* code */
 //   }
+
+
+
+
+
+// Hay que recordar que los parametros estan invertidos para el procesador 1 y el procesador 2, por lo que
+// Por lo que se imprimen ya correctamente:
   cout << "Resultados de simulacion: " << endl;
   cout << "-------------------------------------------------------------------" << endl;
   float global_missrate = ((float)(cpus1->global_misses))/((float)(cpus1->misses_L1P1+cpus1->misses_L1P2+cpus1->hits_L1P1+cpus1->hits_L1P2+cpus1->hits_globales));
